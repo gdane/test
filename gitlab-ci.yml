@@ -1,0 +1,250 @@
+variables:
+  NAME: "aeca"
+  MAJOR: "1"
+  MINOR: "2.0"
+  BUILD: $BUILD_VERSION
+
+stages:
+  - check
+  - sinkin
+  - versioning
+  - building
+  - deployment
+  - packaging
+  - patching
+  - packaging_patch
+  - update
+  - install
+
+before_script:
+  - echo "$GITLAB_USER_LOGIN! runs build for $CI_BUILDS_DIR"    
+  - echo "$CI_COMMIT_AUTHOR pushed to $CI_COMMIT_BRANCH with message $CI_COMMIT_DESCRIPTION"
+  - chmod -R +x ./build/ci_scripts/
+  - chmod -R +x ./scripts_push
+
+sonar-scan:
+  stage: check
+  tags:
+    - redos_242
+  only:
+    - develop
+  script:
+    - /home/adm123/sonar/bin/sonar-scanner -X -Dsonar.projectKey=XqUNVh-jcupXMEGhbKyx -Dsonar.java.jdkHome=/home/adm123/sonar/jre/ -Dsonar.host.url=https://sonarqube.osinit.com -Dsonar.login=6abe336db34119837e02ff95d3e43d069133266c
+  when: manual
+  allow_failure: true
+
+git auto sink:
+  stage: 
+    sinkin
+  tags:
+    - astra_159
+  only:
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:
+    - ./scripts_push/eca_sinc.sh $CI_COMMIT_REF_NAME
+  when: on_success
+  allow_failure: true
+  resource_group: production
+
+git manual sink:
+  stage:
+    sinkin
+  tags:
+    - astra_159
+  only:
+    - develop
+  script:
+    - ./scripts_push/eca_sinc.sh $CI_COMMIT_REF_NAME
+  when: manual
+  allow_failure: true
+  resource_group: production
+
+versioning auto job:
+  stage:
+    versioning
+  tags:
+    - redos_242
+  only:  
+    - develop
+  script:
+    - BUILD=$((BUILD_VERSION + 1))
+    - ./build/ci_scripts//version_set.sh
+    - echo "$BUILD"
+  when: on_success
+  allow_failure: true
+  resource_group: production
+
+versioning manual job:
+  stage:
+    versioning
+  tags:
+    - Any
+  only:
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:
+    - BUILD=$((BUILD_VERSION + 1))
+    - ./build/ci_scripts//version_set.sh
+    - echo "$BUILD"
+  when: manual
+  allow_failure: false
+  resource_group: production
+
+npm-build-job:
+  stage: 
+    building
+  tags:
+    - redos_242
+  only:
+    - develop
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:  
+    - ./build/ci_scripts//build_npm.sh
+  when: on_success
+  artifacts:
+    paths:    
+    - artifacts/*.zip
+    expire_in: 3 days
+
+AECA-CA-rpm-job:
+  stage: 
+    packaging
+  tags:
+    - redos_242
+  only:
+    - develop
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:      
+    - ./build/ci_scripts//installer_AECA-CA-rpm.sh
+  when: on_success
+  allow_failure: true
+  artifacts:
+    paths:    
+    - artifacts/*.rpm
+    expire_in: 3 days
+  resource_group: production
+
+AECA-CA-deb-job:
+  stage:
+    packaging
+  tags:
+    - astra_159
+  only:
+    - develop
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:
+    - ./build/ci_scripts//installer_AECA-CA_deb.sh
+  artifacts:
+    when: on_success
+    paths:
+    - artifacts/*.deb
+    expire_in: 3 days
+  resource_group: production
+
+AECA-VA-rpm-job:
+  stage:
+    packaging
+  tags:
+    - redos_242
+  only:
+    - develop
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:
+    - ./build/ci_scripts//installer_AECA-Va_rpm.sh
+  when: on_success
+  allow_failure: true
+  artifacts:
+    paths:
+      - artifacts/*.rpm
+    expire_in: 3 days
+  resource_group: production
+
+AECA-VA-deb-job:
+  stage:
+    packaging
+  tags:
+    - astra_159
+  only:
+    - develop
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:
+    - ./build/ci_scripts//installer_AECA-VA_deb.sh
+  artifacts:
+    when: on_success
+    paths:
+      - artifacts/*.deb
+    expire_in: 3 days
+  resource_group: production
+
+AECA-deb-job:
+  stage:
+    packaging
+  tags:
+    - astra_159
+  only:
+    - develop
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:
+    - ./build/ci_scripts//createdeb.sh
+  artifacts:
+    when: on_success
+    paths:
+      - artifacts/*.deb
+    expire_in: 3 days
+  resource_group: production
+
+AECA-rpm-job:
+  stage:
+    packaging
+  tags:
+    - redos_242
+  only:
+    - develop
+    - /^alpha.v[0-9]+-[0-9].[0-9].[0-9]+$/
+  script:
+    - ./build/ci_scripts//createrpm.sh
+  when: on_success
+  allow_failure: true
+  artifacts:
+    paths:
+      - artifacts/*.rpm
+    expire_in: 3 days
+  resource_group: production
+
+deployment-redos-aeca-ca:
+  stage:
+    deployment
+  only:
+    - develop
+  tags:
+    - redos_242
+  script:
+    - ./build/ci_scripts//deploy_AECA-CA.sh
+  when: on_success
+  allow_failure: true
+  resource_group: production
+
+deployment-astra-aeca-ca:
+  stage:
+    deployment
+  only:
+    - develop
+  tags:
+    - astra_159
+  script:
+    - ./build/ci_scripts//deploy_AECA-CA.sh
+  when: on_success
+  allow_failure: true
+  resource_group: production
+
+deployment-redos-aeca-va:
+  stage:
+    deployment
+  only:
+    - develop
+  tags:
+    - redos_167
+  script:
+    - ./build/ci_scripts//deploy_AECA-VA.sh
+  when: on_success
+  allow_failure: true
+  resource_group: production
