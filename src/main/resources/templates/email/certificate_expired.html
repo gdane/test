@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    body {
+      font-family: Calibri;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+<!--/*@thymesVar id="username" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fingerprint" type="java.lang.String"*/-->
+<!--/*@thymesVar id="serialnumber" type="java.lang.String"*/-->
+<!--/*@thymesVar id="expire_date" type="java.lang.String"*/-->
+<span th:text="|Здравствуйте, ${username}!|">
+    Здравствуйте, ${username}!
+</span>
+<br/>
+<br/>
+<span th:text="|Время действия сертификата истекает ${expire_date}|">
+    Время действия сертификата истекает ${expire_date}
+</span>
+
+<br/>
+<br/>
+<b>Фингерпринт сертификата:</b>
+<span th:text="${fingerprint}">
+    ${fingerprint}
+</span>
+<br/>
+<b>Серийный номер сертификата:</b>
+<span th:text="${serialnumber}">
+    ${serialnumber}
+</span>
+<br/>
+</body>
+</html>

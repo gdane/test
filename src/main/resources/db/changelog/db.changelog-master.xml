@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+
+    <!-- 2022-07-30 -->
+    <include file="migrations/2022-07-30/init_aeca_email_delivery_type_dict.beschetvertev.xml" relativeToChangelogFile="true"/>
+    <include file="migrations/2022-07-30/init_aeca_email_delivery_template.beschetvertev.xml" relativeToChangelogFile="true"/>
+    <include file="migrations/2022-07-30/init_aeca_email_delivery_log.beschetvertev.xml" relativeToChangelogFile="true"/>
+
+    <!-- 2022-09-30 -->
+    <include file="migrations/2022-09-30/drop_certificate_view.ryahov.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
