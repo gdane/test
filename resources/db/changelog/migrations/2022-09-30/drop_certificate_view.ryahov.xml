@@ -1,0 +1,13 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+    <changeSet id="drop_certificate_view.ryahov.xml" author="alexander.ryahov">
+        <comment>Удаление представления активных сертификатов (если имеется)</comment>
+
+        <sql endDelimiter=";">
+            drop view if exists aeca_email_active_certificate_data_view;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

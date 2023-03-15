@@ -1,0 +1,85 @@
+server:
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  port: ${SERVER_PORT:8888}
+  ssl:
+    key-store: ${KEYSTORE_PATH:/opt/aeca/wildfly/standalone/configuration/keystore/keystore.jks}
+    key-store-password: ${KEYSTORE_PASSWORD:d870427fb495aefbfc14c79af81322f2cbabf327}
+    trust-store: ${TRUSTSTORE_PATH:/opt/aeca/wildfly/standalone/configuration/keystore/truststore.jks}
+    trust-store-password: ${TRUSTSTORE_PASSWORD:63bd3f92f3fcf91bd74c8f56b92ce577609cf80e}
+    client-auth: want
+api:
+  info:
+    title: ${API_INFO_TITLE:Aeca Email Service API}
+    description: ${API_INFO_DESCRIPTION:API для работы с расслкой Email-сообщений}
+    version: ${API_INFO_VERSION:1.0.0}
+    terms-of-service: ${API_INFO_TERM_OF_SERVICE:http://example.com/terms/}
+    contact:
+      name: ${API_INFO_CONTACT_NAME:Product Service API Team}
+      email: ${API_INFO_CONTACT_EMAIL:apiteam@example.com}
+      url: ${API_INFO_CONTACT_URL:http://example.com/team}
+    license:
+      name: ${API_INFO_LICENSE_NAME:Apache 2.0}
+      url: ${API_INFO_LICENSE_URL:http://www.apache.org/licenses/LICENSE-2.0.html}
+
+springdoc:
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:true}
+  paths-to-match: ${SPRINGDOC_PATHS_TO_MATCH:/api/**}
+  packages-to-scan: ${SPRINGDOC_PACKAGES_TO_SCAN:com.aeca}
+
+logging:
+  level:
+    io.swagger.models.parameters.AbstractSerializableParameter: error
+    com.aeca.email: info
+
+feign:
+  httpclient:
+    enabled: true
+  autoconfiguration:
+    jackson.enabled: true
+  okhttp.enabled: true
+  client.config:
+    default:
+      #      decode404: true
+      errorDecoder: com.aeca.email.exception.handler.AecaEmailFeignExceptionHandler
+
+ejbca-ssl:
+  key-store-path: ${FEIGN_KEYSTORE_PATH:/opt/aeca/p12/superadmin.p12}
+  key-store-password: ${FEIGN_KEYSTORE_PASSWORD:12f553ee075a98dd650fcd607b0fb46d5c96e2fc}
+
+aeca-api:
+  subjects: ${AECA_SUBJECTS_URL:https://127.0.0.1:8888/aecaSubjects}
+  aeca-logs: ${AECA_LOGS_URL:https://127.0.0.1:8888/aecaLogs}
+
+spring:
+  web:
+    resources:
+      add-mappings: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+    format:
+      date: yyyy-MM-dd
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/aecatest}
+    username: ${DB_USER:aeca}
+    password: ${DB_PASSWORD:aeca}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    enabled: true
+    change-log: ${LIQUIBASE_CHANGE_LOG:classpath:/db/changelog/db.changelog-master.xml}
+    database-change-log-table: ${LIQUIBASE_CHANGE_LOG_TABLE:_databasechangelog}
+    database-change-log-lock-table: ${LIQUIBASE_CHANGE_LOG_LOCK_TABLE:_databasechangeloglock}
+
+email-sender:
+  host: ${EMAIL_HOST:127.0.0.1}                             # Хост почтового сервера
+  port: ${EMAIL_PORT:25}                                    # Порт почтового сервера
+  login: ${EMAIL_LOGIN:}                                    # Логин пользователя
+  password: ${EMAIL_PASSWORD:}                              # Пароль пользователя
+  email: ${EMAIL_FROM:no_reply@aeca.ru}                     # Почтовый адрес, "с которого отправлено сообщение". Может не работать. Google проставляет логин
+  schedule: ${EMAIL_SCHEDULE:0 */30 * * * *}                # CRON для запуска метода отправки почтовых уведомлений
+  sending: ${EMAIL_ENABLED:true}                           # Флаг отправки почтовых уведомлений, если выкл. то сообщения не отправляются, но помечаются отправленными
+  protocol: ${EMAIL_PROTOCOL:smtp}
+  smtp-auth: ${EMAIL_SMTP_AUTH:false}
+  smtp-start-tls-enable: ${EMAIL_START_TLS:false}
